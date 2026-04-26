@@ -84,4 +84,21 @@ elseif ($action == 'sell_player' && $_SESSION['role'] == 'admin') {
     $conn->query("UPDATE settings SET active_player_id = NULL, auction_status = 'not_started' WHERE id = 1");
     echo json_encode(['success' => 'Player finalized']);
 }
+
+elseif ($action == 'get_all_bids') {
+    $settings = $conn->query("SELECT active_player_id FROM settings WHERE id = 1")->fetch_assoc();
+    if (!$settings['active_player_id']) {
+        echo json_encode(['bids' => []]);
+        exit();
+    }
+    
+    $player_id = $settings['active_player_id'];
+    $bids = $conn->query("SELECT b.*, u.team_name FROM bids b JOIN users u ON b.user_id = u.id WHERE b.player_id = $player_id ORDER BY b.bid_amount DESC");
+    
+    $bid_list = [];
+    while($row = $bids->fetch_assoc()) {
+        $bid_list[] = $row;
+    }
+    echo json_encode(['bids' => $bid_list]);
+}
 ?>
