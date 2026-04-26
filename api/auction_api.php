@@ -21,8 +21,9 @@ if ($action == 'get_status') {
     }
 
     // Get current high bid
-    $high_bid = $conn->query("SELECT b.*, u.team_name FROM bids b JOIN users u ON b.user_id = u.id WHERE b.player_id = " . $settings['active_player_id'] . " ORDER BY b.bid_amount DESC LIMIT 1")->fetch_assoc();
+    $high_bid = $conn->query("SELECT b.*, u.team_name, u.name FROM bids b JOIN users u ON b.user_id = u.id WHERE b.player_id = " . $settings['active_player_id'] . " ORDER BY b.bid_amount DESC LIMIT 1")->fetch_assoc();
 
+    $bidder_name = !empty($high_bid['team_name']) ? $high_bid['team_name'] : ($high_bid['name'] ?? 'No bids yet');
     $current_price = $high_bid ? $high_bid['bid_amount'] : $settings['base_price'];
     $next_bid = $current_price + 100000; // Increment by 1 Lakh
 
@@ -35,13 +36,17 @@ if ($action == 'get_status') {
             'base_price' => $settings['base_price'],
             'current_price' => $current_price,
             'next_bid' => $next_bid,
-            'high_bidder' => $high_bid['team_name'] ?? 'No bids yet'
+            'high_bidder' => $bidder_name
         ],
         'user_budget' => $conn->query("SELECT budget FROM users WHERE id = $user_id")->fetch_assoc()['budget']
     ]);
 } 
 
 elseif ($action == 'place_bid') {
+    if ($_SESSION['role'] !== 'team') {
+        echo json_encode(['error' => 'Only Teams can place bids!']);
+        exit();
+    }
     $player_id = $_POST['player_id'];
     $bid_amount = $_POST['amount'];
 
@@ -99,10 +104,11 @@ elseif ($action == 'get_all_bids') {
     }
     
     $player_id = $settings['active_player_id'];
-    $bids = $conn->query("SELECT b.*, u.team_name FROM bids b JOIN users u ON b.user_id = u.id WHERE b.player_id = $player_id ORDER BY b.bid_amount DESC");
+    $bids = $conn->query("SELECT b.*, u.team_name, u.name FROM bids b JOIN users u ON b.user_id = u.id WHERE b.player_id = $player_id ORDER BY b.bid_amount DESC");
     
     $bid_list = [];
     while($row = $bids->fetch_assoc()) {
+        $row['display_name'] = !empty($row['team_name']) ? $row['team_name'] : $row['name'];
         $bid_list[] = $row;
     }
     echo json_encode(['bids' => $bid_list]);

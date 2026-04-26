@@ -55,7 +55,7 @@ if (isset($_GET['action'])) {
 }
 
 // Data fetching
-$players = $conn->query("SELECT p.*, u.team_name as bought_by FROM players p LEFT JOIN users u ON p.team_id = u.id ORDER BY p.id DESC");
+$players = $conn->query("SELECT p.*, COALESCE(NULLIF(u.team_name, ''), u.name) as bought_by FROM players p LEFT JOIN users u ON p.team_id = u.id ORDER BY p.id DESC");
 $teams = $conn->query("SELECT id, name, team_name, budget, (SELECT COUNT(*) FROM players WHERE team_id = users.id) as player_count FROM users WHERE role = 'team'");
 $stats = $conn->query("SELECT COUNT(*) as total, SUM(CASE WHEN status='sold' THEN 1 ELSE 0 END) as sold FROM players")->fetch_assoc();
 $active_player = $conn->query("SELECT p.* FROM players p JOIN settings s ON s.active_player_id = p.id WHERE s.id = 1")->fetch_assoc();
@@ -265,7 +265,7 @@ $active_player = $conn->query("SELECT p.* FROM players p JOIN settings s ON s.ac
                 if (data.bids && data.bids.length > 0) {
                     monitor.innerHTML = data.bids.map((bid, index) => `
                         <div class="bid-item">
-                            <span>${index === 0 ? '🏆 ' : ''}<strong>${bid.team_name}</strong></span>
+                            <span>${index === 0 ? '🏆 ' : ''}<strong>${bid.display_name}</strong></span>
                             <span>₹${parseInt(bid.bid_amount).toLocaleString()}</span>
                         </div>
                     `).join('');
