@@ -133,6 +133,8 @@ $stats = $conn->query("SELECT COUNT(*) as total, SUM(CASE WHEN status='sold' THE
                             <td>
                                 <?php if($p['status'] == 'available'): ?>
                                     <a href="dashboard.php?action=start_bidding&id=<?php echo $p['id']; ?>" class="action-btn btn-start">Start Bid</a>
+                                <?php elseif($p['status'] == 'bidding'): ?>
+                                    <button onclick="finalizePlayer(<?php echo $p['id']; ?>)" class="action-btn btn-start" style="background: #2ed573;">Sold/Finalize</button>
                                 <?php endif; ?>
                             </td>
                         </tr>
@@ -142,5 +144,17 @@ $stats = $conn->query("SELECT COUNT(*) as total, SUM(CASE WHEN status='sold' THE
             </div>
         </div>
     </div>
+
+    <script>
+        async function finalizePlayer(id) {
+            if(confirm('Finalize this sale?')) {
+                const response = await fetch(`../api/auction_api.php?action=sell_player&id=${id}`);
+                const result = await response.json();
+                if(result.success) {
+                    location.reload();
+                }
+            }
+        }
+    </script>
 </body>
 </html>
