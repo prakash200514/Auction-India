@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $name = $_POST['name'];
         $email = $_POST['email'];
         $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
-        $role = $_POST['role'];
+        $role = 'team'; // Default role to team
         $team_name = isset($_POST['team_name']) ? $_POST['team_name'] : '';
 
         // Check if email exists
@@ -111,13 +111,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <label>Password</label>
                     <input type="password" name="password" class="form-control" required placeholder="••••••••">
                 </div>
-                <div class="form-group">
-                    <label>Role</label>
-                    <select name="role" class="form-control" onchange="toggleTeamField(this.value)">
-                        <option value="team">Team Owner</option>
-                        <option value="admin">Administrator</option>
-                    </select>
-                </div>
+
                 <div class="form-group" id="teamField">
                     <label>Team Name</label>
                     <input type="text" name="team_name" class="form-control" placeholder="e.g. Mumbai Indians">
@@ -134,10 +128,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         function toggleAuth(showRegister) {
             document.getElementById('loginForm').style.display = showRegister ? 'none' : 'block';
             document.getElementById('registerForm').style.display = showRegister ? 'block' : 'none';
-        }
-
-        function toggleTeamField(role) {
-            document.getElementById('teamField').style.display = (role === 'team') ? 'block' : 'none';
         }
     </script>
 </body>
