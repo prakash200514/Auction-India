@@ -77,12 +77,18 @@ elseif ($action == 'sell_player' && $_SESSION['role'] == 'admin') {
 
         $conn->query("UPDATE players SET status = 'sold', team_id = $winner_id, current_price = $amount WHERE id = $player_id");
         $conn->query("UPDATE users SET budget = budget - $amount WHERE id = $winner_id");
+        $conn->query("UPDATE settings SET active_player_id = NULL, auction_status = 'not_started' WHERE id = 1");
+        echo json_encode(['success' => 'Player sold successfully']);
     } else {
-        $conn->query("UPDATE players SET status = 'unsold' WHERE id = $player_id");
+        echo json_encode(['error' => 'No bids found for this player. Use "Unsold" instead.']);
     }
-    
+}
+
+elseif ($action == 'unsold_player' && $_SESSION['role'] == 'admin') {
+    $player_id = $_GET['id'];
+    $conn->query("UPDATE players SET status = 'unsold' WHERE id = $player_id");
     $conn->query("UPDATE settings SET active_player_id = NULL, auction_status = 'not_started' WHERE id = 1");
-    echo json_encode(['success' => 'Player finalized']);
+    echo json_encode(['success' => 'Player marked as unsold']);
 }
 
 elseif ($action == 'get_all_bids') {

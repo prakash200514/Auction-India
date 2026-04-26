@@ -184,7 +184,8 @@ $active_player = $conn->query("SELECT p.* FROM players p JOIN settings s ON s.ac
                                 <?php if($p['status'] == 'available' || $p['status'] == 'unsold'): ?>
                                     <a href="dashboard.php?action=start_bidding&id=<?php echo $p['id']; ?>" class="action-btn btn-start">Start Bid</a>
                                 <?php elseif($p['status'] == 'bidding'): ?>
-                                    <button onclick="finalizePlayer(<?php echo $p['id']; ?>)" class="action-btn btn-start" style="background: #2ed573;">Sold/Unsold</button>
+                                    <button onclick="sellPlayer(<?php echo $p['id']; ?>)" class="action-btn btn-start" style="background: #2ed573;">Mark Sold</button>
+                                    <button onclick="unsoldPlayer(<?php echo $p['id']; ?>)" class="action-btn btn-delete">Mark Unsold</button>
                                 <?php endif; ?>
                             </td>
                         </tr>
@@ -232,9 +233,21 @@ $active_player = $conn->query("SELECT p.* FROM players p JOIN settings s ON s.ac
     </div>
 
     <script>
-        async function finalizePlayer(id) {
-            if(confirm('Finalize this player status? If there are bids, it will be marked as SOLD to the highest bidder. If no bids, it will be marked as UNSOLD.')) {
+        async function sellPlayer(id) {
+            if(confirm('Confirm sale to the highest bidder?')) {
                 const response = await fetch(`../api/auction_api.php?action=sell_player&id=${id}`);
+                const result = await response.json();
+                if(result.success) {
+                    location.reload();
+                } else {
+                    alert(result.error);
+                }
+            }
+        }
+
+        async function unsoldPlayer(id) {
+            if(confirm('Mark this player as UNSOLD?')) {
+                const response = await fetch(`../api/auction_api.php?action=unsold_player&id=${id}`);
                 const result = await response.json();
                 if(result.success) {
                     location.reload();
